@@ -1,0 +1,78 @@
+service: ss-tbot
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  region: ${env:STAGE_AWS_REGION}
+  timeout: 15
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+        - "sqs:GetQueueUrl"
+      Resource:
+        Fn::GetAtt:
+          - ResponseQueue
+          - Arn
+  environment:
+    ACCOUNT_ID:
+      Ref: AWS::AccountId
+    QUEUE_URL:
+      Ref: ResponseQueue
+
+functions:
+  http_handler:
+    handler: handler.http_handler
+    events:
+      - http:
+          path: handle/queue
+          method: post
+          cors: true
+  queue_handler:
+    handler: handler.queue_handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - ResponseQueue
+              - Arn
+  stepfn_handler:
+    handler: handler.stepfn_handler
+
+resources:
+  Resources:
+    ResponseQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ResponseQueue
+
+stepFunctions:
+  stateMachines:
+    telegramworkflow:
+      events:
+        - http:
+            path: handle/stepfn
+            method: post
+            cors: true
+      definition:
+        StartAt: HttpHandlerStep
+        States:
+          HttpHandlerStep:
+            Type: Task
+            Resource:
+              Fn::GetAtt:
+                - stepfn_handler
+                - Arn
+            Next: NextStep
+          NextStep:
+            Type: Task
+            Resource:
+              Fn::GetAtt:
+                - stepfn_handler
+                - Arn
+            End: true
+
+plugins:
+  - serverless-step-functions
+  - serverless-pseudo-parameters
+  - serverless-dotenv-plugin
