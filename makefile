@@ -5,7 +5,6 @@ include .env
 export
 
 WEBHOOK_ARN=hb7r6hbyre
-STAGE=dev
 
 SET_WEBHOOK_URL := https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook
 
@@ -14,7 +13,7 @@ SET_WEBHOOK_URL := https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook
 # stepfn - to leverage Step Functions service via single (or more if required) lambda workflow
 WEBHOOK_TYPE := stepfn
 
-WEBHOOK_URL := https://${WEBHOOK_ARN}.execute-api.${AWS_REGION}.amazonaws.com/${STAGE}/handle/${WEBHOOK_TYPE}
+WEBHOOK_URL := https://${WEBHOOK_ARN}.execute-api.${DEPLOYMENT_AWS_REGION}.amazonaws.com/${DEPLOYMENT_STAGE}/handle/${WEBHOOK_TYPE}
 
 init:
 	@ make deps webhook deploy

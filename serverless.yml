@@ -3,7 +3,7 @@ service: ss-tbot
 provider:
   name: aws
   runtime: nodejs10.x
-  region: ${env:STAGE_AWS_REGION}
+  region: ${env:DEPLOYMENT_AWS_REGION}
   timeout: 15
   iamRoleStatements:
     - Effect: "Allow"
