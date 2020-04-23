@@ -8,7 +8,7 @@ const handleMsg = async (message) => {
 
   await echo(chatId, `Handling message: ${messageId}`);
 
-  lex.handle(message);
+  await lex.handle(message);
 
   await echo(chatId, `Message handled: ${messageId}`);
 }
